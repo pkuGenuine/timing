@@ -1,0 +1,1 @@
+from account.decorator import RenderWithIdentity
