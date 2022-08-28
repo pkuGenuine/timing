@@ -119,4 +119,8 @@ SECRET_KEY = ('django-insecure-ixz=ho!2df*vpczj4t0mt0(a6hr8w4q4l4k(74iajrd5eh^b%
                 if DEBUG
                 else os.environ['DJANGO_SECRET_KEY'])
 ALLOWED_HOSTS = ['*'] if DEBUG else os.environ['DJANGO_ALLOWED_HOSTS'].split(':')
-CSRF_TRUSTED_ORIGINS = [DOMAIN]
+CSRF_TRUSTED_ORIGINS = [f'https://{DOMAIN}']
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS.append(f'http://{DOMAIN}')
+
+
