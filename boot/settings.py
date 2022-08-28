@@ -3,6 +3,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import logging
 import os
 from pathlib import Path
 
@@ -16,11 +17,17 @@ STATIC_ROOT = os.environ.get('DJANGO_STATIC_ROOT',
                              os.path.join(BASE_DIR, 'static'))
 MEDIA_ROOT = os.environ.get('DJANGO_STATIC_ROOT',
                             os.path.join(BASE_DIR, 'media'))
+LOG_ROOT = os.environ.get('DJANGO_LOG_ROOR',
+                           os.path.join(BASE_DIR, 'logs'))
 ROOT_URLCONF = 'boot.urls'
-RUNNING_ENV = os.environ.get('DJANGO_DEBUG_LEVEL', 'DEV')
+RUNNING_ENV = os.environ.get('DJANGO_RUNNING_ENV', 'DEV')
+RUNNING_JOB = os.environ.get('DJANGO_RUNNING_JOB', 'WEB_SERVER')
+# USER_TEST is less strict but do not display debug info
 if RUNNING_ENV not in ['DEV', 'TEST', 'USER_TEST', 'PRODUCT']:
     raise ValueError(f'Unsupported Debug level: {RUNNING_ENV}')
 DEBUG = (RUNNING_ENV in ['DEV', 'TEST'])
+LOG_LEVEL = logging.DEBUG if DEBUG else logging.INFO
+DOMAIN = os.environ.get('DJANGO_DOMAIN', 'localhost')
 
 
 # Application definition
@@ -71,24 +78,18 @@ WSGI_APPLICATION = "boot.wsgi.application"
 # Database & Auth
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DJANGO_DB', 'dev_db'),
+        'HOST': os.environ.get('DJANGO_DB_HOST', 'mysql'),
+        'PORT': os.environ.get('DJANGO_DB_PORT', 3306),
+        'USER': os.environ.get('DJANGO_DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', 'changeme'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': os.environ.get('DJANGO_DB', 'dev_db'),
-#         'HOST': os.environ.get('DJANGO_DB_HOST', 'db'),
-#         'PORT': os.environ.get('DJANGO_DB_PORT', 3306),
-#         'USER': os.environ.get('DJANGO_DB_USER', 'root'),
-#         'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', 'changeme'),
-#         'OPTIONS': {
-#             'charset': 'utf8mb4',
-#         },
-#     }
-# }
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -118,3 +119,4 @@ SECRET_KEY = ('django-insecure-ixz=ho!2df*vpczj4t0mt0(a6hr8w4q4l4k(74iajrd5eh^b%
                 if DEBUG
                 else os.environ['DJANGO_SECRET_KEY'])
 ALLOWED_HOSTS = ['*'] if DEBUG else os.environ['DJANGO_ALLOWED_HOSTS'].split(':')
+CSRF_TRUSTED_ORIGINS = [DOMAIN]

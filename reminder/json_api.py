@@ -2,13 +2,13 @@ from datetime import datetime
 
 from django.http import HttpRequest
 
-from general_utils.decorator import SimpolJsonResponse
-from account.decorator import IdentityCheck
+from general_utils.decorator import generic_checker
+from account.decorator import identity_check
 from reminder.models import DailyTask, DailyTaskRecord
 
 
-@SimpolJsonResponse()
-@IdentityCheck(required_method_list=['POST'])
+@generic_checker(accept_method_list=['POST'], ret_json=True)
+@identity_check()
 def daily_task(request: HttpRequest, title: str) -> dict | None:
     """API to manipulate daily task object
     Not take concurrency into consideration
@@ -34,8 +34,8 @@ def daily_task(request: HttpRequest, title: str) -> dict | None:
     raise ValueError(f'Unsupported opr: {operation}')
 
 
-@SimpolJsonResponse()
-@IdentityCheck(required_method_list=['POST'])
+@generic_checker(accept_method_list=['POST'], ret_json=True)
+@identity_check()
 def daily_record(request: HttpRequest, title: str):
     """API to manipulate TODAY'S daily task record object
     Not take concurrency into consideration

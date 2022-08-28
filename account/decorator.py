@@ -1,38 +1,36 @@
 from functools import wraps
-from typing import Callable, List
+from typing import Callable
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.views.decorators.http import require_POST, require_GET, require_http_methods
 from django.shortcuts import render
 
 
-class RenderWithIdentity():
+def identity_check(check_access: Callable = lambda x: True,
+                   user_info_add: Callable = lambda x: x) -> Callable:
+    """Perform user specific check,
+    add generic user info, like name, avatar
 
-    def __init__(self, required_method_list: List[str] = ['GET', 'POST']):
-        self.method_checker = require_http_methods(required_method_list)
+    :param check_access: function to check access, defaults to lambdax:True
+    :type check_access: Callable, optional
+    :param user_info_add: , defaults to lambdax:x
+    :type user_info_add: Callable, optional
+    :return: _description_
+    :rtype: Callable
+    """
 
-    def __call__(self, func: Callable) -> Callable:
-
+    def decorator(func: Callable) -> Callable:
         @login_required()
-        @self.method_checker
         @wraps(func)
-        def wrapper(request: HttpRequest, *args, **kwds) -> HttpResponse:
-            template, frontend_dict = func(request, *args, **kwds)
-            return render(request, template, frontend_dict)
+        def wrapper(request: HttpRequest, *args, **kwds) -> HttpResponse | dict | None:
+            assert check_access(request.user)
+            ret = func(request, *args, **kwds)
+            if isinstance(ret, tuple):
+                template, frontend_dict = ret
+                user_info_add(frontend_dict)
+                return render(request, template, frontend_dict)
+            # else, dict or None
+            return ret
         return wrapper
 
-
-class IdentityCheck():
-
-    def __init__(self, required_method_list: List[str] = ['GET', 'POST']):
-        self.method_checker = require_http_methods(required_method_list)
-
-    def __call__(self, func: Callable) -> Callable:
-
-        @login_required()
-        @self.method_checker
-        @wraps(func)
-        def wrapper(request: HttpRequest, *args, **kwds) -> HttpResponse:
-            return func(request, *args, **kwds)
-        return wrapper
+    return decorator

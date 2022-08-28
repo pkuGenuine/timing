@@ -1,16 +1,16 @@
 from typing import Tuple
 from django.http import HttpRequest
 
-from general_utils.decorator import HtmlViewResponse
-from account.decorator import RenderWithIdentity
+from general_utils.decorator import generic_checker
+from account.decorator import identity_check
 from reminder.models import DailyTask
 
 
 RenderParam = Tuple[str, dict]
 
 
-@HtmlViewResponse()
-@RenderWithIdentity()
+@generic_checker()
+@identity_check()
 def daily_check(request: HttpRequest) -> RenderParam:
     """daily task check page
     """
@@ -20,8 +20,8 @@ def daily_check(request: HttpRequest) -> RenderParam:
     return 'daily_check.html', frontend_dict
 
 
-@HtmlViewResponse()
-@RenderWithIdentity()
+@generic_checker()
+@identity_check()
 def daily_manage(request: HttpRequest) -> RenderParam:
     """daily task manage page
     """
@@ -30,8 +30,8 @@ def daily_manage(request: HttpRequest) -> RenderParam:
     return 'daily_check_management.html', frontend_dict
 
 
-@HtmlViewResponse()
-@RenderWithIdentity()
+@generic_checker()
+@identity_check()
 def daily_display(request: HttpRequest) -> RenderParam:
     """daily task summary display page
     """

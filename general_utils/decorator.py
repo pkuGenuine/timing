@@ -1,60 +1,52 @@
+import os
 from functools import wraps
-from typing import Callable
+from typing import Callable, List
+import logging
 
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import redirect
+from django.conf import settings
+
+from general_utils.log import log_exception
 
 
-class SimpolJsonResponse():
+logger = logging.getLogger(__name__)
+logger.setLevel(settings.LOG_LEVEL)
+fh = logging.FileHandler(os.path.join(settings.LOG_ROOT, 'exception.log'))
+fh.setLevel(settings.LOG_LEVEL)
+logger.addHandler(fh)
 
-    def __init__(self):
-        ...
 
-    def __call__(self, func: Callable) -> Callable:
-        """Capture exception and return valid: False
+def generic_checker(accept_method_list: List[str] = ['GET', 'POST'],
+                    ret_json=False) -> Callable:
+    """Perform user-independent check, 
+    capture any unexpected exception,
+    and profiling
 
-        Otherwise, return valid: True
-
-        :param func: 
-        :type func: Callable
-        :return: 
-        :rtype: Callable
-        """
-
-        @wraps(func)
+    :param accept_method_list: http request methods, defaults to ['GET', 'POST']
+    :type accept_method_list: List[str], optional
+    :param ret_json: return json or not (http), defaults to False
+    :type ret_json: bool, optional
+    :return: decorator
+    :rtype: Callable
+    """
+    def decorator(wrapped_response: Callable) -> Callable:
+        @wraps(wrapped_response)
         def wrapper(request: HttpRequest, *args, **kwds):
             try:
-                response = dict(valid=True)
-                ret = func(request, *args, **kwds)
-                if ret is not None:
-                    response.update(**ret)
-                return JsonResponse(response)
-            except:
-                # TODO: if debug, raise
-                return JsonResponse(dict(valid=False))
-        return wrapper
-
-
-class HtmlViewResponse():
-
-    def __init__(self):
-        ...
-
-    def __call__(self, wrapped_view: Callable) -> Callable:
-        """Capture exception and redirect error page
-
-        :param wrapped_view: 
-        :type wrapped_view: Callable
-        :return: 
-        :rtype: Callable
-        """
-
-        @wraps(wrapped_view)
-        def wrapper(request: HttpRequest, *args, **kwds):
-            try:
-                return wrapped_view(request, *args, **kwds)
+                assert request.method in accept_method_list, \
+                    f'HTTP {request.method} request not supported. Want {accept_method_list}'
+                ret = wrapped_response(request, *args, **kwds)
+                if ret_json:
+                    ret.update(valid=True)
+                    return JsonResponse(ret)
+                return ret 
             except Exception as e:
-                # TODO: log it
+                if settings.DEBUG:
+                    raise
+                log_exception(logger, e)
+                if ret_json:
+                    return JsonResponse(dict(valid=False))
                 return redirect('/error_page')
         return wrapper
-
+    return decorator
