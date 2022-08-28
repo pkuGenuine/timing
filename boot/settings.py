@@ -122,5 +122,3 @@ ALLOWED_HOSTS = ['*'] if DEBUG else os.environ['DJANGO_ALLOWED_HOSTS'].split(':'
 CSRF_TRUSTED_ORIGINS = [f'https://{DOMAIN}']
 if DEBUG:
     CSRF_TRUSTED_ORIGINS.append(f'http://{DOMAIN}')
-
-
