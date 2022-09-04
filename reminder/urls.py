@@ -10,4 +10,6 @@ urlpatterns = [
     # reverse('daily_task', kwargs={'title':'ttt'})
     path('daily_task/<str:title>', json_api.daily_task, name='daily_task'),
     path('daily_record/<str:title>', json_api.daily_record, name='daily_record'),
+    ### weekly report related
+    path('weekly_report', views.weekly_report, name='weekly_report')
 ]

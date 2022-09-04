@@ -12,7 +12,6 @@ class DailyTask(models.Model):
     title = models.CharField(max_length=15)
     active = models.BooleanField(default=True)
     label = models.CharField(max_length=15, default='')
-    content = models.CharField(max_length=63, default='')
 
     def __str__(self):
         return self.title

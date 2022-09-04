@@ -20,8 +20,10 @@ logger.addHandler(fh)
 def generic_checker(accept_method_list: List[str] = ['GET', 'POST'],
                     ret_json=False) -> Callable:
     """Perform user-independent check, 
-    capture any unexpected exception,
-    and profiling
+    capture any unexpected exception, and profiling
+
+    If ret_json is true, wrapped_response can return None, the decorator
+        will return a dict('valid=False').
 
     :param accept_method_list: http request methods, defaults to ['GET', 'POST']
     :type accept_method_list: List[str], optional
