@@ -31,3 +31,19 @@ class DailyTaskRecord(models.Model):
     remark = models.CharField(max_length=63, default='')
     status = models.SmallIntegerField(choices=RecordStatus.choices,
                                       default=RecordStatus.CHECKED)
+
+
+class WeeklyReport(models.Model):
+
+    class Meta:
+        unique_together = ['user', 'due_date']
+        # ordering: -due_date
+
+    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    title = models.CharField(max_length=31)
+
+    # Benifit over file: query
+    content = models.CharField(max_length=65535, default='')
+
+    due_date = models.DateField(auto_now_add=True)
+

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Timing</title>
+  {% load static %}
+  <!-- use bulma as basic layout css framework -->
+  <link rel="stylesheet" href="{% static 'css/bulma.css' %}">
+  {% block extra_css %}
+  {% endblock %}
+</head>
+
+<body>
+  {% include 'navbar.html' %}
+  {% if top_message %}
+  <section class="hero is-primary is-small">
+    <div class="hero-body">
+      {{ top_message }}
+      </p>
+    </div>
+  </section>
+  {% endif %}
+  <main class="bd-docs-main">
+    <div class="container mx-5 my-2">
+    {% block mainpage %}
+    {% endblock %}
+    </div>
+  </main>
+  <script src="{% static 'js/jquery-3.6.1.min.js' %}"></script>
+  <script src="https://kit.fontawesome.com/dee2345e45.js" crossorigin="anonymous"></script>
+  <!-- Self maintained js for bulma classes -->
+  <script src="{% static 'js/general-bulma-jquery.js' %}"></script>
+  {% block extra_js %}
+  {% endblock %}
+</body>
+
+</html>
